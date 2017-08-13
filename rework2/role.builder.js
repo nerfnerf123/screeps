@@ -19,21 +19,21 @@ var roleBuilder = {
         }
         else if(creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
-            creep.say('🔄 harvest');
-            creep.say("🌟 energy");
+            //creep.say('🔄 harvest');
+            //creep.say("🌟 energy");
             getEnergy();
         }
         else if(!creep.memory.building && (creep.carry.energy == creep.carryCapacity) && constructs.length > 0 ) {
             creep.memory.upgrading = false;
             creep.memory.building = true;
-            creep.say('🚧 build');
+            //creep.say('🚧 build');
         }
         else if(creep.memory.building) {
             if(constructs.length > 0 && (Game.time%150)==1) {
                 console.log("Structure Queue: " + constructs.length); 
             }
             if(creep.build(constructs[int]) == ERR_NOT_IN_RANGE) {
-                creep.say("🏃 moving");
+                //creep.say("🏃 moving");
                 creep.moveTo(constructs[int], {visualizePathStyle: {stroke: '#ffffff'}});
             }
             
@@ -48,15 +48,15 @@ var roleBuilder = {
             //creep.say("🌟 energy");
             if(creep.memory.upgrading && creep.carry.energy == 0) {
                 creep.memory.upgrading = false;
-                creep.say('🔄 harvest');
+                //creep.say('🔄 harvest');
             }   
             if(!creep.memory.upgrading && creep.carry.energy == creep.carry.energyCapacity) {
                 creep.memory.upgrading = true;
-                creep.say('⚡ upgrade');
+                //creep.say('⚡ upgrade');
             }
             if(creep.memory.upgrading) {
                 if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                    creep.say("🏃 moving");
+                    //creep.say("🏃 moving");
                     creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#00FFD1'}});
                 }
             }
@@ -77,7 +77,7 @@ var roleBuilder = {
                             structure.energy >= structure.energyCapacity*0.9; // if we use *0.9 harvesters still can't replenish quickly enough
             }});
             
-            if((targets.length > 0 && creep.room.energyAvailable >= 500) || (Memory.stage == 1 && creep.room.energyAvalible >= 300)){ // only starts using energy from spawn at stage 4 - needs this inorder to allow stage 3 creeps to spawn
+            if((targets.length > 0 && creep.room.energyAvailable >= 500) || (Memory.stage == 0 && creep.room.energyAvalible >= 290)){ // only starts using energy from spawn at stage 4 - needs this inorder to allow stage 3 creeps to spawn
                 creep.say('🔄getEnergy');
                 if(creep.withdraw(targets[int], RESOURCE_ENERGY)==ERR_NOT_IN_RANGE){
                     creep.moveTo(targets[int], {visualizePathStyle: {stroke: '#0CFF00'}});
@@ -95,7 +95,7 @@ var roleBuilder = {
                 creep.say('🔄 harvest');
                 var sources = creep.room.find(FIND_SOURCES);
                 if(creep.harvest(sources[1]) == ERR_NOT_IN_RANGE) {
-                    creep.say("🏃 moving");
+                    //creep.say("🏃 moving");
                     creep.moveTo(sources[1], {visualizePathStyle: {stroke: '#ffaa00'}});
                 }
             }

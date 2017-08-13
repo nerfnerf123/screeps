@@ -33,7 +33,7 @@ var spawn = {
                 break;
             // STAGE 1 : 2exts
             case 'harvester1':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,MOVE], undefined, {role: 'harvester'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,CARRY,MOVE], undefined, {role: 'harvester'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new harvester: ' + newName);
                 }
@@ -45,27 +45,27 @@ var spawn = {
                 }
                 break;
             case 'upgrader1':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,MOVE], undefined, {role: 'upgrader'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,CARRY,MOVE], undefined, {role: 'upgrader'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new upgrader: ' + newName);
                 }
                 break;
 
-            // STAGE 2 : 5exts
+            // STAGE 2 : 5exts : 550energy
             case 'harvester2':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,MOVE,MOVE], undefined, {role: 'harvester'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,WORK,CARRY,CARRY,MOVE], undefined, {role: 'harvester'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new harvester: ' + newName);
                 }
                 break;
             case 'builder2':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,CARRY,MOVE], undefined, {role: 'builder'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], undefined, {role: 'builder'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new builder: ' + newName);
                 }
                 break;
             case 'upgrader2':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,MOVE,MOVE], undefined, {role: 'upgrader'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE], undefined, {role: 'upgrader'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new upgrader: ' + newName);
                 }

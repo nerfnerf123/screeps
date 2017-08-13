@@ -49,10 +49,10 @@ var roleUpgrader = {
             var targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
                         return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                            structure.energy == structure.energyCapacity;
+                            structure.energy >= structure.energyCapacity*0.8;
             }});
             
-            if(targets.length > 0 && Memory.stage>=1 && creep.room.energyAvailable >= 400){ // only starts using energy from spawn at stage 1 
+            if(targets.length > 0){ // only starts using energy from spawn at stage 1 //&& creep.room.energyAvailable >= 400
                 creep.say('🔄getEnergy');
                 if(creep.withdraw(targets[int], RESOURCE_ENERGY)==ERR_NOT_IN_RANGE){
                     creep.moveTo(targets[int], {visualizePathStyle: {stroke: '#0CFF00'}});
@@ -66,11 +66,11 @@ var roleUpgrader = {
                     }
                 }
             }
-            else if(targets.length==0 || Memory.stage<1 || creep.room.energyAvailable < 400){
+            else if(targets.length==0){ //|| creep.room.energyAvailable < 400
                 creep.say('🔄 harvest');
                 var sources = creep.room.find(FIND_SOURCES);
                 if(creep.harvest(sources[1]) == ERR_NOT_IN_RANGE) {
-                    creep.say("🏃 moving");
+                    //creep.say("🏃 moving");
                     creep.moveTo(sources[1], {visualizePathStyle: {stroke: '#ffaa00'}});
                 }
             }

@@ -15,7 +15,7 @@ var roleDefender = {
         const target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
         if(target) {
             if(creep.attack(target) == ERR_NOT_IN_RANGE) {
-                creep.say("🏃 moving");
+                //creep.say("🏃 moving");
                 creep.moveTo(target, {visualizePathStyle: {stroke: '#FF8000'}});
             }
         }

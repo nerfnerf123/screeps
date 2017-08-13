@@ -15,6 +15,19 @@ TO DO LIST :
     - CREATE SEPERATE SPAWNING SCRIPT AS FUNCTION=>RETURN NAME
     - Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE,MOVE], undefined, {role: 'paver'});
 */
+/*
+REWORK 2.0 :
+    - establish infastructure for bee-lining RCL3
+      - stage 0 : 2 harvester, 2 builder, 1 upgrader, get to 2 extensions
+      - stage 1 : 4 better harvester, 2 better builder, 3 better upgrader, get to 5 extensions
+      - stage 2 : 2 3work2carry1move harvester, 2 better builder, 2 better upgrader, get to RCL3
+
+    - bee-line RCL3
+      - stage 3 : 2 upgraded harvesters, 3 better builder, 1 better upgrader, get 8 extensions, roads
+      - stage 4 : 2 upgraded harvesters, 2 better builder, 1 better upgrader, defenses
+    - build roads + DEFENSES
+
+*/
 var spawn = require('function.spawn');
 var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
@@ -34,7 +47,7 @@ module.exports.loop = function () {
         //var creepRole = Game.creeps[name].memory.role;
         if(!Game.creeps[name]) {
             delete Memory.creeps[name];
-            console.log('Clearing non-existing creep memory: '+ name + ', who was a ');
+            console.log('   Clearing non-existing creep memory: '+ name + ', who was a ');
         }
     }
 
@@ -95,15 +108,21 @@ module.exports.loop = function () {
             spawn.run('harvester0');
         }
         // BUILDERS
-        else if(builders.length < 1) { // if harvesters less than 2, make more
+        else if(builders.length < 2) { // if harvesters less than 2, make more
             spawn.run('builder0');
         }
         // UPGRADERS
         else if(upgraders.length < 1) { // if harvesters less than 2, make more
             spawn.run('upgrader0');
         }
+        // CONSTRUCTION
+        if(Game.rooms[roomName].controller.level >= 2) {
+            Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom left
+            Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom
+        } 
+        
         // PROGRESSION CHECKER
-        if(harvesters.length >= 2 && builders.length >= 1 && upgraders.length >= 1 && Memory.stage == 0 && Game.rooms[roomName].controller.level >= 2) {
+        if(harvesters.length >= 2 && builders.length >= 1 && upgraders.length >= 1 && Memory.stage == 0 && extensions.length >= 2 && Game.rooms[roomName].controller.level >= 2) {
             Memory.stage++;
             if((Game.time%modTime)==1) {
             //console.log('👍 UPGRADED TO STAGE 1');
@@ -115,29 +134,30 @@ module.exports.loop = function () {
             }
         }
     }
-    // STAGE 1 : BASIC
+    // STAGE 1 : 5ext
     function stage1() {
         // HARVESTERS
-        if(harvesters.length < 3) { // if harvesters less than 2, make more
-            spawn.run('harvester0');
+        if(harvesters.length < 7) { // if harvesters less than 2, make more
+            spawn.run('harvester1');
         }
         // BUILDERS
-        else if(builders.length < 3) { // if harvesters less than 2, make more
-            spawn.run('builder0');
+        else if(builders.length < 2) { // if harvesters less than 2, make more
+            spawn.run('builder1');
         }
         // UPGRADERS
         else if(upgraders.length < 1) { // if harvesters less than 2, make more
-            spawn.run('upgrader0');
+            spawn.run('upgrader1');
         }
         // CONSTRUCTION
-        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom left
-        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom
 
-
-        // STRUCTURE CHECKER
+        //console.log("SpawnPos: " + spawnPos);
+        // 0,0 is top left corner
+        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom right
+        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y, STRUCTURE_EXTENSION); // spawns at left
+        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y, STRUCTURE_EXTENSION); // spawns at right
 
         // PROGRESSION CHECKER
-        if(harvesters.length >= 3 && builders.length >= 3 && upgraders.length >= 1 && extensions.length >= 2 && Memory.stage == 1) {
+        if(harvesters.length >= 7 && builders.length >= 2 && upgraders.length >= 1 && extensions.length >= 5 && (Game.spawns['Spawn1'].room.energyAvailable >= 300 || harvesters.length >= 10) && Memory.stage == 1) {
             Memory.stage++;
             if((Game.time%modTime)==1) {
             //console.log('👍 UPGRADED TO STAGE 2');
@@ -153,31 +173,37 @@ module.exports.loop = function () {
     // STAGE 2 : IMPROVEMENT
     function stage2() {
         // HARVESTERS
-        if(harvesters.length < 3) { // if harvesters less than 2, make more
+        /*
+        if(harvesters.length >= 7){
+            spawn.run('harvester2');
+        }
+        */
+        if(harvesters.length < 12) { // if harvesters less than 2, make more
             spawn.run('harvester2');
         }
         // BUILDERS
-        else if(builders.length < 4) { // if harvesters less than 2, make more
+        else if(builders.length < 2) { // if harvesters less than 2, make more
             spawn.run('builder2');
         }
         // UPGRADERS
-        else if(upgraders.length < 1) { // if harvesters less than 2, make more
+        else if(Game.rooms[roomName].controller.level >= 3 && upgraders.length < 2) {
             spawn.run('upgrader2');
         }
-        // CONSTRUCTION
-
-        //console.log("SpawnPos: " + spawnPos);
-        // 0,0 is top left corner
-        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom right
-        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y, STRUCTURE_EXTENSION); // spawns at left
-        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y, STRUCTURE_EXTENSION); // spawns at right
-
-        // STRUCTURE CHECKER
-
-        //console.log("Extensions: " + extensions.length);
-
+        else if((Game.rooms[roomName].controller.level < 3) && upgraders.length < 4) { // if harvesters less than 2, make more
+            spawn.run('upgrader2');
+        }
+        // STAGE 1 DELETE
+        for(var name in Game.creeps) {
+            //console.log('NAME: ' + name + ' BODY: ' + Game.creeps[name].getActiveBodyparts(WORK));
+            if((Game.creeps[name].getActiveBodyparts(WORK) == 3) && (Game.creeps[name].getActiveBodyparts(CARRY) == 1) && (Game.creeps[name].getActiveBodyparts(MOVE) == 1)) {
+                name.suicide;
+                console.log('   Clearing "Harvester1" creep memory: '+ name);
+            }
+        }
+        // MAX ENERGY CHECKER
+        checkMaxEnergy();
         // PROGRESSION CHECKER
-        if(harvesters.length >= 3 && builders.length >= 4 && upgraders.length >= 1 && extensions.length >= 5 && Memory.stage == 2) {
+        if(harvesters.length >= 12 && builders.length >= 2 && upgraders.length >= 2 && extensions.length >= 5 && Game.rooms[roomName].controller.level >= 3 && Memory.stage == 2) {
             Memory.stage++;
             if((Game.time%modTime)==1) {
             //console.log('👍 UPGRADED TO STAGE 3');
@@ -190,10 +216,10 @@ module.exports.loop = function () {
             }
         }
     }
-    // STAGE 3 : DEFENSES // takes 8000 ticks
+    // STAGE 3 : ROADS
     function stage3() {
         // HARVESTERS
-        if(harvesters.length < 4) { // if harvesters less than 2, make more
+        if(harvesters.length < 12) { // if harvesters less than 2, make more
             spawn.run('harvester3');
         }
         // BUILDERS
@@ -201,7 +227,7 @@ module.exports.loop = function () {
             spawn.run('builder3');
         }
         // UPGRADERS
-        else if(upgraders.length < 1) { // if harvesters less than 2, make more
+        else if(upgraders.length < 4) { // if harvesters less than 2, make more
             spawn.run('upgrader3');
         }
         // DEFENDERS
@@ -210,22 +236,25 @@ module.exports.loop = function () {
         }
         // CONSTRUCTION
         // 0,0 is top left corner
+        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+1 left
+        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+1
+        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+1 right
 
         // PROGRESSION CHECKER
-        if(harvesters.length >= 4 && builders.length >= 4 && upgraders.length >= 1 && defenders.length >= 1 && Memory.stage == 3) { //extensions.length >= 5
+        if(harvesters.length >= 12 && builders.length >= 4 && upgraders.length >= 4 && defenders.length >= 1 && extensions.length >= 8 && Memory.stage == 3) { //extensions.length >= 5
             Memory.stage++;
             if((Game.time%modTime)==1) {
             //console.log('👍 UPGRADED TO STAGE 4');
             }
         }
-
+        
         else {
             if((Game.time%modTime)==1) {
                 console.log("Progress to Memory.stage 4: Harvesters: " + harvesters.length + " Builders: " + builders.length + " Upgraders: " + upgraders.length + " Defenders: " + defenders.length + " Extensions: " + extensions.length);
             }
         }
     }
-    // STAGE 4 : ROADS
+    // STAGE 4 : DEFENSES
     function stage4() {
         // HARVESTERS
         if(harvesters.length < 4) { // if harvesters less than 2, make more
@@ -292,9 +321,7 @@ module.exports.loop = function () {
         // CONSTRUCTION
         //console.log("SpawnPos: " + spawnPos);
         // 0,0 is top left corner
-        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+1 left
-        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+1
-        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+1 right
+        
 
         // PROGRESSION CHECKER
         if(harvesters.length >= 4 && builders.length >= 4 && upgraders.length >= 2 && defenders.length >= 4 && pavers.length >= 1 && Memory.stage == 5 && Game.rooms[roomName].controller.level >= 3) { //extensions.length >= 5
@@ -310,7 +337,7 @@ module.exports.loop = function () {
             }
         }
     }
-
+    
     // ASSIGNS ROLES
     for(var name in Game.creeps) { // goes through every creep, reads their role, then runs according script via import
         var creep = Game.creeps[name];
@@ -330,6 +357,28 @@ module.exports.loop = function () {
             rolePaver.run(creep);
         }
     }
-
+    
+    // MAX ENERGY BUILDER
+    function checkMaxEnergy(){
+        var inter = 0; // uses switch case in order to build more storage // ZERO IS NO STORAGE
+        if(Game.spawns['Spawn1'].room.energyAvailable == Game.spawns['Spawn1'].room.energyCapacityAvailable){
+            inter++;
+        }
+        switch(inter) {
+            case 0:
+                return('Storages not maxed!');
+                break;
+            case 1:
+                Game.rooms[roomName].createConstructionSite(spawnPos.x-3, spawnPos.y-1, STRUCTURE_EXTENSION); // spawns at left-3 up-1
+                break;
+            case 2:
+                Game.rooms[roomName].createConstructionSite(spawnPos.x-3, spawnPos.y, STRUCTURE_EXTENSION); // spawns at left-3 up-1
+                break;
+            case 3:
+                Game.rooms[roomName].createConstructionSite(spawnPos.x-3, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at left-3 up-1
+                break;
+        }
+        
+    }
 
 }
