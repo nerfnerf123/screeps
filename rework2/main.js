@@ -9,6 +9,8 @@ COLORS :
     - WHITE : MOVING
     - GREEN : getEnergy()
     - PURPLE : PAVER MOVING
+FLAGS :
+    - 'Harvesters' : harvester rally point
 TO DO LIST :
     - REDO HARVESTING ARCHITECHTURE
         - MINER w/ min carry/max work => ENERGY_CARRIER w/ max carry/move => STORAGE where everyone else grabs energy from
@@ -27,6 +29,25 @@ REWORK 2.0 :
       - stage 4 : 2 upgraded harvesters, 2 better builder, 1 better upgrader, defenses
     - build roads + DEFENSES
 
+*/
+/*
+OCCUPIED CONSTRUCTION SITES :
+    0 = free
+    x = occupied
+    T = tower
+    S = Spawn1
+    
+    
+    1.  1   2   3   4   5   6   7 
+    2.  0   0   0   x   0   0   0
+    2.  0   0   x   T   x   0   0 
+    3.  x   0   0   0   0   0   0 
+    4.  x   0   0   S   0   0   0 
+    5.  x   0   0   x   0   0   0
+    6.  0   0   x   x   x   0   0
+    8.  0   0   0   x   0   0   0   
+    9.  0   0   0   0   0   0   0
+    
 */
 var spawn = require('function.spawn');
 var roleHarvester = require('role.harvester');
@@ -100,8 +121,24 @@ module.exports.loop = function () {
             stage5();
             break;
     }
+    // TOWER
+    var tower = Game.spawns['Spawn1'].room.find(FIND_MY_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType == STRUCTURE_TOWER);}});
+    if(tower) {
+        var closestDamagedStructure = tower[0].pos.findClosestByRange(FIND_STRUCTURES, {
+            filter: (structure) => structure.hits < structure.hitsMax
+        });
+        if(closestDamagedStructure) {
+            tower[0].repair(closestDamagedStructure);
+        }
 
-    // STAGE 0 : STARTER
+        var closestHostile = tower[0].pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        if(closestHostile) {
+            tower[0].attack(closestHostile);
+        }
+    };
+    // STAGE 0 : STARTER 2 EXTENSIONS
     function stage0() {
         // HARVESTERS
         if(harvesters.length < 2) { // if harvesters less than 2, make more
@@ -117,8 +154,8 @@ module.exports.loop = function () {
         }
         // CONSTRUCTION
         if(Game.rooms[roomName].controller.level >= 2) {
-            Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom left
-            Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom
+            Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom of spawn
+            Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+2, STRUCTURE_EXTENSION); // spawns at bottom-2 from spawn
         } 
         
         // PROGRESSION CHECKER
@@ -134,7 +171,7 @@ module.exports.loop = function () {
             }
         }
     }
-    // STAGE 1 : 5ext
+    // STAGE 1 : 5 EXTENSIONS
     function stage1() {
         // HARVESTERS
         if(harvesters.length < 7) { // if harvesters less than 2, make more
@@ -152,9 +189,9 @@ module.exports.loop = function () {
 
         //console.log("SpawnPos: " + spawnPos);
         // 0,0 is top left corner
-        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom right
-        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y, STRUCTURE_EXTENSION); // spawns at left
-        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y, STRUCTURE_EXTENSION); // spawns at right
+        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y+2, STRUCTURE_EXTENSION); // spawns at left of petal center
+        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y+2, STRUCTURE_EXTENSION); // spawns at right of petal center
+        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+3, STRUCTURE_EXTENSION); // spawns at bottom of petal center
 
         // PROGRESSION CHECKER
         if(harvesters.length >= 7 && builders.length >= 2 && upgraders.length >= 1 && extensions.length >= 5 && (Game.spawns['Spawn1'].room.energyAvailable >= 300 || harvesters.length >= 10) && Memory.stage == 1) {
@@ -170,7 +207,7 @@ module.exports.loop = function () {
             }
         }
     }
-    // STAGE 2 : IMPROVEMENT
+    // STAGE 2 : IMPROVEMENT && RCL3
     function stage2() {
         // HARVESTERS
         /*
@@ -236,9 +273,9 @@ module.exports.loop = function () {
         }
         // CONSTRUCTION
         // 0,0 is top left corner
-        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+1 left
-        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+1
-        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+1 right
+        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+2 left of spawn
+        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-1, STRUCTURE_EXTENSION); // spawns at top+3 of spawn
+        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+2 right of spawn
 
         // PROGRESSION CHECKER
         if(harvesters.length >= 12 && builders.length >= 4 && upgraders.length >= 4 && defenders.length >= 1 && extensions.length >= 8 && Memory.stage == 3) { //extensions.length >= 5
@@ -278,8 +315,9 @@ module.exports.loop = function () {
         }
 
         // CONSTRUCTION
-        //console.log("SpawnPos: " + spawnPos);
         // 0,0 is top left corner
+        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-2, STRUCTURE_TOWER);
+        
 
         // PROGRESSION CHECKER
         if(harvesters.length >= 4 && builders.length >= 4 && upgraders.length >= 2 && defenders.length >= 2 && pavers.length >= 1 && Memory.stage == 4 && Game.rooms[roomName].controller.level >= 3) { //extensions.length >= 5

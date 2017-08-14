@@ -1,3 +1,4 @@
+// HARVESTS ENERGY FROM SOURCE AND DROPS AT SPAWN
 var roleHarvester = {
     // write if dropping full then move next to spawn
     
@@ -32,11 +33,14 @@ var roleHarvester = {
                 }
             }
         }
+        // ENERGY HARVESTING
         if(creep.carry.energy < creep.carryCapacity) {
             var sources = creep.room.find(FIND_SOURCES);
+            const path = creep.pos.findPathTo(sources[next]);
             if(creep.harvest(sources[next]) == ERR_NOT_IN_RANGE) {
                 //creep.say("🏃 moving");
-                creep.moveTo(sources[next], {visualizePathStyle: {stroke: '#ffaa00'}});
+                //creep.moveTo(sources[next], {visualizePathStyle: {stroke: '#ffaa00'}});
+                creep.moveTo(path[next].x, path[next].y, {visualizePathStyle: {stroke: '#ffaa00'}});
             }
             else if(creep.harvest(sources[0]) == ERR_NOT_ENOUGH_RESOURCES) {
                 next++;
@@ -55,34 +59,16 @@ var roleHarvester = {
         if(creep.memory.dropping == true) { // remains true until creep has 0 energy left 
             dropEnergy();
         }
-        
-        /*
-        if(creep.carry.energy == creep.carryCapacity) {
-            var targets = creep.room.find(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                        structure.energy < structure.energyCapacity;
-                }});
-            creep.say("dropping!");
-            creep.moveTo(targets[int], {visualizePathStyle: {stroke: '#ff6699'}});
-            if(creep.transfer(targets[int],RESOURCE_ENERGY) == ERR_FULL) {
-                console.log("STORAGE FULL! " + targets[int])
-                int++;
-                if(int > Game.spawns['Spawn1'].room.find(FIND_MY_STRUCTURES, {filter: { structureType: STRUCTURE_EXTENSION }})){
-                    int = 0;
-                }
-            }
-        }
-        */
-        
         function dropEnergy(){ // fix so that it dums ALL energy
             var int = 0; // for structures
+            
             const targets = creep.room.find(FIND_MY_STRUCTURES, {
                 filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_TOWER || STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                    return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
                         structure.energy < structure.energyCapacity;
             }});
             //creep.say("Dropping!")
+            
             if(creep.transfer(targets[int], RESOURCE_ENERGY)==ERR_NOT_IN_RANGE){
                 creep.moveTo(targets[int],{visualizePathStyle: {stroke: '#ff6699'}});
             }

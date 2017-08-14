@@ -1,33 +1,15 @@
-/*
-// roomName
-var roomName = Game.spawns['Spawn1'].room;
-roomName = String(roomName);
-roomName = roomName.replace('[room','');
-roomName = roomName.replace(']','');
-roomName = roomName.replace(/\s/g, '');
-*/
-
+// FIXES WALLS
 var rolePaver = {
     run: function(creep) {
         var intWall = 0;
         //var walls = creep.room.find(FIND_STRUCTURES, {filter: (objects) => { return (structureType: STRUCTURE_WALL) && objects.hits < objects.hitsMax;}});
         var walls = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_WALL) && structure.hits < structure.hitsMax;
+                    return (structure.structureType == STRUCTURE_WALL) && structure.hits < 20000 ; //structure.hitsMax
             }});
         //console.log(walls.length);
         if(walls.length > 0){
-            /*
-            var closestDamagedStructure = creep.room.find(FIND_STRUCTURES, {
-                filter: (object) => { structureType: STRUCTURE_WALL && object.hits < object.hitsMax; }
-            });
-            */
-            //console.log("closestDamagedStructure " + walls[intWall]);
-            
             if(walls) {
-                //var job = creep.repair(walls[intWall]);
-                //console.log(job);
-                //console.log('Walls.hit: ' + walls[intWall].hits)
                 if(walls[intWall].hits >= 1000) { // walls[intWall].hitsMax*0.0001){ // goes to 300 right now q
                     intWall++;
                 }
@@ -44,13 +26,15 @@ var rolePaver = {
                 if(creep.repair(walls[intWall])==ERR_NOT_ENOUGH_RESOURCES){ // REPLACE THIS WITH GOING TO A CONTAINER AND HARVESTING
                     getEnergy();
                 }
-                
             }
         }
         else{
             creep.say("NO WALLS");
-            creep.moveTo(Game.spawns['Spawn1'].pos.x+2,Game.spawns['Spawn1'].pos.y+2);
-        }
+            if(creep.moveTo(Game.flags['Pavers']) != 0) {
+                creep.moveTo(Game.spawns['Spawn1'].pos.x-2,Game.spawns['Spawn1'].pos.y-2);
+            };
+        };
+        
         
         function getEnergy(){ // fix at 49 energy
             var int = 0;
@@ -82,7 +66,7 @@ var rolePaver = {
                     creep.moveTo(sources[1], {visualizePathStyle: {stroke: '#ffaa00'}});
                 }
             }
-        };
+        }
     }
 }; 
 

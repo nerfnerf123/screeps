@@ -1,5 +1,4 @@
-var getEnergy = require('function.getEnergy');
-
+// USES ENERGY FROM SOURCE/SPAWN TO BUILD STUFF
 var roleBuilder = {
     // build functiton that determinds all of the possible stages where it can and cannot use spawn energy
     /** @param {Creep} creep **/
@@ -36,8 +35,6 @@ var roleBuilder = {
                 //creep.say("🏃 moving");
                 creep.moveTo(constructs[int], {visualizePathStyle: {stroke: '#ffffff'}});
             }
-            
-            
         }
         else {
             getEnergy();
@@ -74,11 +71,11 @@ var roleBuilder = {
             var targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
                         return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                            structure.energy >= structure.energyCapacity*0.9; // if we use *0.9 harvesters still can't replenish quickly enough
+                            structure.energy >= structure.energyCapacity*0.6; // if we use *0.9 harvesters still can't replenish quickly enough
             }});
             
-            if((targets.length > 0 && creep.room.energyAvailable >= 500) || (Memory.stage == 0 && creep.room.energyAvailable >= 290)){ // only starts using energy from spawn at stage 4 - needs this inorder to allow stage 3 creeps to spawn
-                creep.say('🔄getEnergy');
+            if(targets.length > 0 && (!Memory.specialBuilder || Memory.pairActive)){ // only starts using energy from spawn at stage 4 - needs this inorder to allow stage 3 creeps to spawn
+                //creep.say('🔄getEnergy');
                 if(creep.withdraw(targets[int], RESOURCE_ENERGY)==ERR_NOT_IN_RANGE){
                     creep.moveTo(targets[int], {visualizePathStyle: {stroke: '#0CFF00'}});
                 }
@@ -91,8 +88,16 @@ var roleBuilder = {
                     }
                 }
             }
+            else if(Memory.specialBuilder){
+                //creep.say('🔄 harvest');
+                var sources = creep.room.find(FIND_SOURCES);
+                if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                    //creep.say("🏃 moving");
+                    creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
+                }
+            }
             else if(targets.length==0 || creep.room.energyAvailable < 500){
-                creep.say('🔄 harvest');
+                //creep.say('🔄 harvest');
                 var sources = creep.room.find(FIND_SOURCES);
                 if(creep.harvest(sources[1]) == ERR_NOT_IN_RANGE) {
                     //creep.say("🏃 moving");
