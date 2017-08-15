@@ -2,7 +2,8 @@ var roleUpgrader = {
     /** @param {Creep} creep **/
     run: function(creep) {
         var buildRoad = require('function.buildRoad');
-        buildRoad.buildRoad(creep);
+        //buildRoad.buildRoad(creep);
+        
         if(Memory.signed == false) {
             if(creep.signController(creep.room.controller, "New player - please don't hurt me!") == ERR_NOT_IN_RANGE) {
                 creep.moveTo(creep.room.controller);

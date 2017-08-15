@@ -141,6 +141,7 @@ module.exports.loop = function () {
     if(Memory.containersDone[0] && !Memory.builtContainers[1]) {
         buildContainers(1); //build containers at source 1 - use pairs 3/4 to access
     }; 
+    //console.log(buildable);
     if(Memory.builtContainers[1] && (containers.length >= buildable)){ // BROKEN PLEASE FIX ME
         Memory.containersDone[1] = true;
         Memory.specialBuilder = false;
@@ -506,12 +507,12 @@ module.exports.loop = function () {
     function buildContainers(sourceNum){
         let sources = Game.rooms[roomName].find(FIND_SOURCES);
         let aroundSources = {
-            pos1: {x: sources[sourceNum].pos.x-1, y: sources[sourceNum].pos.y-1, wall: false}, // top ;eft
+            pos1: {x: sources[sourceNum].pos.x-1, y: sources[sourceNum].pos.y-1, wall: false}, // top left
             pos2: {x: sources[sourceNum].pos.x, y: sources[sourceNum].pos.y-1, wall: false}, // top middle
             pos3: {x: sources[sourceNum].pos.x+1, y: sources[sourceNum].pos.y-1, wall: false}, // top right
             pos4: {x: sources[sourceNum].pos.x-1, y: sources[sourceNum].pos.y, wall: false}, // left
             pos5: {x: sources[sourceNum].pos.x+1, y: sources[sourceNum].pos.y, wall: false}, // right
-            pos6: {x: sources[sourceNum].pos.x+1, y: sources[sourceNum].pos.y+1, wall: false}, // bottom left
+            pos6: {x: sources[sourceNum].pos.x-1, y: sources[sourceNum].pos.y+1, wall: false}, // bottom left
             pos7: {x: sources[sourceNum].pos.x, y: sources[sourceNum].pos.y+1, wall: false}, // bottom middle
             pos8: {x: sources[sourceNum].pos.x+1, y: sources[sourceNum].pos.y+1, wall: false}, // bottom right
         }; 
@@ -584,7 +585,7 @@ module.exports.loop = function () {
     };
     // REPORTING FUNCTION 
     function report(current, prog){
-        console.log('Current stage: ' + current + ' => Progress to stage ' + prog +  ': Harvesters: ' + harvesters.length + ' Builders: ' + builders.length + ' Upgraders: ' + upgraders.length + ' Repairers: ' + repairers.length + ' Pavers: ' + pavers.length + ' Defenders: ' + defenders.length +  ' Energy: ' + Game.spawns['Spawn1'].room.energyAvailable);
+        console.log('Current stage: ' + current + ' => Progress to stage ' + prog +  ': Harvesters: ' + harvesters.length + ' Builders: ' + builders.length + ' Upgraders: ' + upgraders.length + ' Repairers: ' + repairers.length + ' Pavers: ' + pavers.length + ' Defenders: ' + defenders.length + ' Extensions: ' + extensions.length + ' Energy: ' + Game.spawns['Spawn1'].room.energyAvailable);
     }
 
 }
