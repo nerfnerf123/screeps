@@ -1,7 +1,7 @@
 /*
 REQUIREMENTS FOR SPAWN : 
     FIRST SOURCE HAS 3 BLOCKS FOR HARVESTING
-    3 BLOCK RADIUS AROUND SPAWN
+    3 BLOCK RADIUS AROUND SPAWN (4 blocks required for the top of spawn)
     PLACE SPAWN NEAR ROOM CONTROLLER FOR MAX EFFICENCY
 
 COLORS :
@@ -11,17 +11,16 @@ COLORS :
     - CYAN : BUILDERS UPGRADING
     - RED : PAVERS MOVING
     - ORANGE : DEFENDERS MOVING
+    - LIGHTER ORANGE : MINER MOVING
     - WHITE : MOVING
     - GREEN : getEnergy()
     - PURPLE : PAVER MOVING
 FLAGS :
     - 'Harvesters' : harvester/hauler rally point
     - 'Pavers' : paver/repairer rally point
+    - 'Defenders' : defenders rally point
 TO DO LIST :
-    - REDO HARVESTING ARCHITECHTURE
-        - MINER w/ min carry/max work => ENERGY_CARRIER w/ max carry/move => STORAGE where everyone else grabs energy from
-    - CREATE SEPERATE SPAWNING SCRIPT AS FUNCTION=>RETURN NAME
-    - Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE,MOVE], undefined, {role: 'paver'});
+    - REWORK MINER SPAWNING SCRIPT TO SPAWN BIGGER MINERS AT LATER STAGES
 */
 /*
 REWORK 2.0 :
@@ -164,10 +163,10 @@ module.exports.loop = function () {
             stage3();
             break;
         case 4:
-            //stage4();
+            stage4();
             break;
         case 5:
-            //stage5();
+            stage5();
             break;
     };
     // STAGES FUNCTIONS
@@ -198,19 +197,17 @@ module.exports.loop = function () {
         // PROGRESSION CHECKER
         if(harvesters.length >= 0 && builders.length >= 3 && upgraders.length >= 1 && Memory.stage == 0 && extensions.length >= 2 && Game.rooms[roomName].controller.level >= 2 && Memory.containersDone[0]) {
             Memory.stage++;
-            if((Game.time%modTime)==1) {
-            }
         }
         else {
             if((Game.time%modTime)==1) {
-                console.log("Progress to Memory.stage 1: Harvesters: " + harvesters.length + " Builders: " + builders.length + " Upgraders: " + upgraders.length);
+                report(0,1);   
             }
         }
     };
     // STAGE 1 - get two pairs up 
     function stage1() {
         // HARVESTERS
-        if(harvesters.length < 2) { // if harvesters less than 2, make more
+        if(harvesters.length < 1) { // if harvesters less than 2, make more
             spawn.run('harvester1');
         }
         // BUILDERS
@@ -226,23 +223,24 @@ module.exports.loop = function () {
             spawn.run('repairer4');
         }
         // MINER / HAULER
-        spawnPair(1);
+        if(checkSource(1)){
+            spawnPair(1);
+        };
+        
         
         //CONSTRUCTION 
         Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y+2, STRUCTURE_EXTENSION); // spawns at left of petal center
         Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y+2, STRUCTURE_EXTENSION); // spawns at right of petal center
         Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+3, STRUCTURE_EXTENSION); // spawns at bottom of petal center
-        checkMaxEnergy(); // dont use it until stage 2
+        //checkMaxEnergy(); // dont use it until stage 2
         
         // PROGRESSION CHECKER
-        if(harvesters.length >= 1 && builders.length >= 4 && upgraders.length >= 1 && repairers.length >= 1 && Memory.stage == 1 && extensions.length >= 5 && Game.rooms[roomName].controller.level >= 2 && Game.spawns['Spawn1'].room.energyAvailable >= 150 && Memory.containersDone[1] && Memory.pairActive) {
+        if(harvesters.length >= 1 && builders.length >= 4 && upgraders.length >= 1 && repairers.length >= 1 && Memory.stage == 1 && extensions.length >= 5 && Game.rooms[roomName].controller.level >= 2 && Memory.containersDone[1] && Memory.pairActive) { //&& Game.spawns['Spawn1'].room.energyAvailable >= 150
             Memory.stage++;
-            if((Game.time%modTime)==1) {
-            }
         }
         else {
             if((Game.time%modTime)==1) {
-                console.log("Progress to Memory.stage 2: Harvesters: " + harvesters.length + " Builders: " + builders.length + " Upgraders: " + upgraders.length + " Repairers: " + repairers.length);
+                report(1,2);
             }
         }
     };
@@ -269,24 +267,26 @@ module.exports.loop = function () {
             spawn.run('paver4');
         }
         // MINER / HAULER
-        spawnPair(2); //can't do this bc they dont have anywhere to go... solution? add a second property to the function that tells them which source to go to instead of defaulting to 0
-        spawnPair(3);
+        if(checkSource(2) && Game.spawns['Spawn1'].room.energyAvailable >= 200){ 
+            spawnPair(2);
+        };
+        if(checkSource(3) && Game.spawns['Spawn1'].room.energyAvailable >= 550){ // ensures that only big combos will be spawned
+            spawnPair(3);
+        };
         //CONSTRUCTION 
         
-        checkMaxEnergy();
+        //checkMaxEnergy();
         // PROGRESSION CHECKER
-        if(harvesters.length >= 1 && builders.length >= 8 && upgraders.length >= 1 && repairers.length >= 1 && pavers.length >= 1 && Memory.stage == 2 && extensions.length >= 5 && Game.rooms[roomName].controller.level >= 3 && Memory.containersDone[0] && Memory.pairActive) {
+        if(harvesters.length >= 1 && builders.length >= 8 && upgraders.length >= 1 && repairers.length >= 1 && pavers.length >= 1 && Memory.stage == 2 && extensions.length >= 5 && Game.rooms[roomName].controller.level >= 3 && Memory.containersDone[1] && Memory.pairActive) {
             Memory.stage++;
-            if((Game.time%modTime)==1) {
-            }
         }
         else {
             if((Game.time%modTime)==1) {
-                console.log("Progress to Memory.stage 3: Harvesters: " + harvesters.length + " Builders: " + builders.length + " Upgraders: " + upgraders.length + " Repairers: " + repairers.length + " Pavers: " + pavers.length);
+                report(2,3);
             }
         }
     };
-    // STAGE 3 - ROADS
+    // STAGE 3 - RCL is 3, defenses/roads can be developed
     function stage3() { 
         // HARVESTERS
         if(harvesters.length < 1) { // if harvesters less than 2, make more
@@ -308,48 +308,133 @@ module.exports.loop = function () {
         else if(pavers.length < 1) { // if harvesters less than 2, make more
             spawn.run('paver4');
         }
+        // DEFENDERS
+        else if(defenders.length < 2) { // if harvesters less than 2, make more
+            spawn.run('defender4');
+        }
+        // TOWER
+        tower(0); // function that runs the tower
         // MINER / HAULER
         //spawnPair(2); can't do this bc they dont have anywhere to go... solution? add a second property to the function that tells them which source to go to instead of defaulting to 0
         
         //CONSTRUCTION 
+        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-2, STRUCTURE_TOWER); // spawns at top+2 of spawn
         Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+2 left of spawn
-        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-1, STRUCTURE_EXTENSION); // spawns at top+3 of spawn
+        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-1, STRUCTURE_EXTENSION); // spawns at top+1 of spawn
         Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+2 right of spawn
-        checkMaxEnergy();
+        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y, STRUCTURE_EXTENSION); // spawns at left of spawn
+        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y, STRUCTURE_EXTENSION); // spawns at right of spawn
+        
+        //checkMaxEnergy();
         // PROGRESSION CHECKER
-        if(harvesters.length >= 1 && builders.length >= 8 && upgraders.length >= 1 && repairers.length >= 1 && pavers.length >= 1 && Memory.stage == 3 && extensions.length >= 8 && Game.rooms[roomName].controller.level >= 3 && Memory.containersDone[0] && Memory.pairActive) {
+        if(harvesters.length >= 1 && builders.length >= 8 && upgraders.length >= 1 && repairers.length >= 1 && pavers.length >= 1 && defenders.length >= 2 && Memory.stage == 3 && extensions.length >= 10 && Game.rooms[roomName].controller.level >= 3 && Memory.containersDone[1] && Memory.pairActive) {
             Memory.stage++;
-            if((Game.time%modTime)==1) {
-            }
         }
         else {
             if((Game.time%modTime)==1) {
-                console.log("Progress to Memory.stage 4: Harvesters: " + harvesters.length + " Builders: " + builders.length + " Upgraders: " + upgraders.length + " Repairers: " + repairers.length + " Pavers: " + pavers.length);
+                report(3,4);
             }
         }
     };
-    /*
-    if(Game.rooms[roomName].controller.level >= 2) {
+    // STAGE 4 - RCL is 3, building up to RCL 4
+    function stage4() { 
+        // HARVESTERS
+        if(harvesters.length < 1) { // if harvesters less than 2, make more
+            spawn.run('harvester4');
+        }
+        // BUILDERS
+        else if(builders.length < 2) { // if harvesters less than 2, make more
+            spawn.run('builder4');
+        }
+        // UPGRADERS
+        else if(upgraders.length < 6) { // if harvesters less than 2, make more
+            spawn.run('upgrader4');
+        }
+        // REPAIRERS
+        else if(repairers.length < 1) { // if harvesters less than 2, make more
+            spawn.run('repairer4');
+        }
+        // PAVERS
+        else if(pavers.length < 1) { // if harvesters less than 2, make more
+            spawn.run('paver4');
+        }
+        // DEFENDERS
+        else if(defenders.length < 2) { // if harvesters less than 2, make more
+            spawn.run('defender4');
+        }
+        // TOWER
+        tower(0); // function that runs the tower
+        // MINER / HAULER
+        //spawnPair(2); can't do this bc they dont have anywhere to go... solution? add a second property to the function that tells them which source to go to instead of defaulting to 0
         
+        //CONSTRUCTION 
         
-        
-        
-        
-        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom of spawn
-        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+2, STRUCTURE_EXTENSION); // spawns at bottom-2 from spawn
-        // THESE TWO FIRST
-        
-        // THEN THESE
-        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y+2, STRUCTURE_EXTENSION); // spawns at left of petal center
-        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y+2, STRUCTURE_EXTENSION); // spawns at right of petal center
-        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+3, STRUCTURE_EXTENSION); // spawns at bottom of petal center
-    }; 
-    if(Game.rooms[roomName].controller.level >= 3) {
-        Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+2 left of spawn
-        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-1, STRUCTURE_EXTENSION); // spawns at top+3 of spawn
-        Game.rooms[roomName].createConstructionSite(spawnPos.x+1, spawnPos.y-2, STRUCTURE_EXTENSION); // spawns at top+2 right of spawn
+        //checkMaxEnergy();
+        // PROGRESSION CHECKER
+        if(harvesters.length >= 1 && builders.length >= 2 && upgraders.length >= 6 && repairers.length >= 1 && pavers.length >= 1 && defenders.length >= 2 && Memory.stage == 4 && extensions.length >= 10 && Game.rooms[roomName].controller.level >= 4 && Memory.containersDone[1] && Memory.pairActive) {
+            Memory.stage++;
+        }
+        else {
+            if((Game.time%modTime)==1) {
+                report(4,5);
+            }
+        }
     };
-    */
+    // STAGE 5 - RCL is 4, building exts upto 20
+    function stage5() { 
+        // HARVESTERS
+        if(harvesters.length < 1) { // if harvesters less than 2, make more
+            spawn.run('harvester5');
+        }
+        // BUILDERS
+        else if(builders.length < 6) { // if harvesters less than 2, make more
+            spawn.run('builder5');
+        }
+        // UPGRADERS
+        else if(upgraders.length < 2) { // if harvesters less than 2, make more
+            spawn.run('upgrader5');
+        }
+        // REPAIRERS
+        else if(repairers.length < 1) { // if harvesters less than 2, make more
+            spawn.run('repairer4');
+        }
+        // PAVERS
+        else if(pavers.length < 1) { // if harvesters less than 2, make more
+            spawn.run('paver4');
+        }
+        // DEFENDERS
+        else if(defenders.length < 4) { // if harvesters less than 2, make more
+            spawn.run('defender4');
+        }
+        // TOWER
+        tower(0); // function that runs the tower
+        // MINER / HAULER
+        //spawnPair(2); can't do this bc they dont have anywhere to go... solution? add a second property to the function that tells them which source to go to instead of defaulting to 0
+        
+        // CONSTRUCTION 
+        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-3, STRUCTURE_EXTENSION); // spawns at top+3 of spawn
+        Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-4, STRUCTURE_EXTENSION); // spawns at top+4 of spawn
+        // LEFT PETAL
+        Game.rooms[roomName].createConstructionSite(spawnPos.x-2, spawnPos.y, STRUCTURE_EXTENSION); // center
+        Game.rooms[roomName].createConstructionSite(spawnPos.x-3, spawnPos.y, STRUCTURE_EXTENSION); // left
+        Game.rooms[roomName].createConstructionSite(spawnPos.x-2, spawnPos.y-1, STRUCTURE_EXTENSION); // upper
+        Game.rooms[roomName].createConstructionSite(spawnPos.x-2, spawnPos.y+1, STRUCTURE_EXTENSION); // lower
+        // RIGHT PETAL
+        Game.rooms[roomName].createConstructionSite(spawnPos.x+2, spawnPos.y, STRUCTURE_EXTENSION); // center
+        Game.rooms[roomName].createConstructionSite(spawnPos.x+3, spawnPos.y, STRUCTURE_EXTENSION); // right
+        Game.rooms[roomName].createConstructionSite(spawnPos.x+2, spawnPos.y-1, STRUCTURE_EXTENSION); // upper
+        Game.rooms[roomName].createConstructionSite(spawnPos.x+2, spawnPos.y+1, STRUCTURE_EXTENSION); // lower
+        
+        // PROGRESSION CHECKER
+        if(harvesters.length >= 1 && builders.length >= 6 && upgraders.length >= 2 && repairers.length >= 1 && pavers.length >= 1 && defenders.length >= 4 && Memory.stage == 5 && extensions.length >= 20 && Game.rooms[roomName].controller.level >= 4 && Memory.containersDone[1] && Memory.pairActive) {
+            Memory.stage++;
+        }
+        else {
+            if((Game.time%modTime)==1) {
+                report(5,6);
+            }
+        }
+    };
     
     // ASSIGNS ROLES
     for(var name in Game.creeps) { // goes through every creep, reads their role, then runs according script via import
@@ -403,10 +488,24 @@ module.exports.loop = function () {
             Memory.pairActive = false;;
         };
     };
+    // CHECKS HOW MANY IF SOURCENUM IS VALID - implement function that looks at how many var buildable there is and spawn accordingly
+    function checkSource(sourceNum){
+        let targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType == STRUCTURE_CONTAINER) &&
+                        structure.store[RESOURCE_ENERGY] < structure.storeCapacity;
+            }});
+        if(targets[sourceNum]){
+            return true;
+        };
+        if(!targets[sourceNum]){
+            return false;
+        };
+    };
     // CONTAINER BUILDER
     function buildContainers(sourceNum){
         let sources = Game.rooms[roomName].find(FIND_SOURCES);
-        var aroundSources = {
+        let aroundSources = {
             pos1: {x: sources[sourceNum].pos.x-1, y: sources[sourceNum].pos.y-1, wall: false}, // top ;eft
             pos2: {x: sources[sourceNum].pos.x, y: sources[sourceNum].pos.y-1, wall: false}, // top middle
             pos3: {x: sources[sourceNum].pos.x+1, y: sources[sourceNum].pos.y-1, wall: false}, // top right
@@ -464,24 +563,28 @@ module.exports.loop = function () {
         
     };
     // TOWER
-    function tower() {
+    function tower(num) {
         // TOWER
         let tower = Game.spawns['Spawn1'].room.find(FIND_MY_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_TOWER);}});
-        if(tower) {
-            let closestDamagedStructure = tower[0].pos.findClosestByRange(FIND_STRUCTURES, {
+        if(tower.length > 0) {
+            let closestDamagedStructure = tower[num].pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => structure.hits < structure.hitsMax
             });
             if(closestDamagedStructure) {
-                tower[0].repair(closestDamagedStructure);
+                tower[num].repair(closestDamagedStructure);
             }
 
-            let closestHostile = tower[0].pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+            let closestHostile = tower[num].pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if(closestHostile) {
-                tower[0].attack(closestHostile);
+                tower[num].attack(closestHostile);
             }
         };    
     };
+    // REPORTING FUNCTION 
+    function report(current, prog){
+        console.log('Current stage: ' + current + ' => Progress to stage ' + prog +  ': Harvesters: ' + harvesters.length + ' Builders: ' + builders.length + ' Upgraders: ' + upgraders.length + ' Repairers: ' + repairers.length + ' Pavers: ' + pavers.length + ' Defenders: ' + defenders.length +  ' Energy: ' + Game.spawns['Spawn1'].room.energyAvailable);
+    }
 
 }

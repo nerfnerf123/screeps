@@ -5,7 +5,7 @@ var roleHarvester = {
     /** @param {Creep} creep **/
     run: function(creep) {
         var buildRoad = require('function.buildRoad');
-        buildRoad.buildRoad(creep);
+        //buildRoad.buildRoad(creep);
         
         
         var next = 0; // for sources
@@ -37,6 +37,9 @@ var roleHarvester = {
         if(creep.carry.energy < creep.carryCapacity) {
             var sources = creep.room.find(FIND_SOURCES);
             const path = creep.pos.findPathTo(sources[next]);
+            if(next > sources.length) {
+                next = 0;
+            }
             if(creep.harvest(sources[next]) == ERR_NOT_IN_RANGE) {
                 //creep.say("🏃 moving");
                 //creep.moveTo(sources[next], {visualizePathStyle: {stroke: '#ffaa00'}});
@@ -44,9 +47,6 @@ var roleHarvester = {
             }
             else if(creep.harvest(sources[0]) == ERR_NOT_ENOUGH_RESOURCES) {
                 next++;
-                if(next > sources.length) {
-                    next = 0;
-                }
             }
         }
         // ENERGY DROPPING LOOP

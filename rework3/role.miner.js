@@ -16,7 +16,7 @@ var roleMiner = {
                 creep.harvest(source);
             }
             else {
-                creep.moveTo(targets[source]);
+                creep.moveTo(targets[source],{visualizePathStyle: {stroke: '#ff6a00'}});
             }
         }
     }

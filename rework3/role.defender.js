@@ -12,10 +12,12 @@ var roleDefender = {
         }
         if(!target){
             creep.say("NO TARGETS")
-            creep.moveTo(spawnPos.x+4,spawnPos.y+4);
+            if(creep.moveTo(Game.flags['Defenders']) != 0) {
+                    creep.moveTo(Game.spawns['Spawn1'].pos.x+4,Game.spawns['Spawn1'].pos.y+4);
+                }
         }
         if(creep.hits<=creep.hitsMax*0.5){
-            console.log(creep + "HP " + creeps.hits);
+            console.log(creep + "HP " + creep.hits);
         }  
         
     }

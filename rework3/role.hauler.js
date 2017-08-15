@@ -1,9 +1,13 @@
 // HAULS ENERGY FROM CONTAINER TO SPAWN
+var buildRoad = require('function.buildRoad');
 var roleHauler = {
     run: function(creep, source) {
+        
+        buildRoad.buildRoad(creep); // only creeps that needs this bc needs to transport energy quick
+        
         if(creep.memory.supplying && creep.carry.energy == 0) { 
             creep.memory.supplying = false; 
-            creep.say('fetching'); 
+            creep.say('fetch@' + source); 
         }
         if(!creep.memory.supplying && creep.carry.energy == creep.carryCapacity) { 
             creep.memory.supplying = true; 
@@ -24,7 +28,7 @@ var roleHauler = {
             */
             dropEnergy();
         }
-        else { 
+        else { // WITHDRAWING FROM MINING CONTAINER
             let containers = creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_CONTAINER) &&
@@ -49,14 +53,29 @@ var roleHauler = {
             }
             
         };
+        
         function dropEnergy(){ // fix so that it dums ALL energy
             var int = 0; // for structures
             
-            const targets = creep.room.find(FIND_MY_STRUCTURES, {
+            let targets = creep.room.find(FIND_MY_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_CONTAINER ||  structure.structureType == STRUCTURE_TOWER || structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
                         structure.energy < structure.energyCapacity;
             }});
+            /*
+            let targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        if ((structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity) {
+                            return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy < structure.energyCapacity;
+                        };
+                        
+                        if ((structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] < structure.storeCapacity) {
+                            return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] < structure.storeCapacity;
+                        }; 
+                        
+                    }        
+            });
+            */
             //creep.say("Dropping!")
             
             if(creep.transfer(targets[int], RESOURCE_ENERGY)==ERR_NOT_IN_RANGE){

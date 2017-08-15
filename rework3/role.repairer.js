@@ -30,12 +30,19 @@ var roleRepairer = {
             getEnergy();
         };
         function getEnergy(){ 
-            var int = 0;
-            var targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
+            let int = 0;
+            let targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                            structure.energy >= structure.energyCapacity*0.8;
-            }});
+                        if ((structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity) {
+                            return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy < structure.energyCapacity;
+                        };
+                        
+                        if ((structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] < structure.storeCapacity) {
+                            return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] < structure.storeCapacity;
+                        }; 
+                        
+                    }        
+            });
             
             if(targets.length > 0){ // only starts using energy from spawn at stage 1 //&& creep.room.energyAvailable >= 400
                 creep.say('🔄getEnergy');

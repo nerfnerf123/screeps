@@ -4,7 +4,7 @@ var roleBuilder = {
     /** @param {Creep} creep **/
     run: function(creep) {
         var buildRoad = require('function.buildRoad');
-        buildRoad.buildRoad(creep);
+        //buildRoad.buildRoad(creep);
         
         var int = 0;
         var constructs = creep.room.find(FIND_CONSTRUCTION_SITES);
@@ -13,8 +13,7 @@ var roleBuilder = {
         }
         if(!creep.memory.building && constructs.length == 0){
             creep.memory.upgrading = true;
-            //creep.say('⚡ upgrade');
-            upgrade();
+            upgrade()
         }
         else if(creep.memory.building && creep.carry.energy == 0) {
             creep.memory.building = false;
@@ -37,7 +36,9 @@ var roleBuilder = {
             }
         }
         else {
+            
             getEnergy();
+            
         }
         
     
@@ -63,18 +64,28 @@ var roleBuilder = {
             }
             
         }
-        function getEnergy(){ // fix at 49 energy
+        function getEnergy(){ // ADAPT TO NEW LOGISTICS SYSTEM
             if(creep.carry.energy == creep.carryCapacity){
                 return 'full';
             }
             var int = 0;
             var targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
+                        if ((structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy >= structure.energyCapacity*0.6 && creep.room.controller.level < 3) {
+                            return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy >= structure.energyCapacity*0.6;
+                        };
+                        if ((structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] >= structure.storeCapacity*0.4) {
+                            return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] >= structure.storeCapacity*0.4;
+                        }; 
+                        
+                        /*
                         return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                            structure.energy >= structure.energyCapacity*0.6; // if we use *0.9 harvesters still can't replenish quickly enough
-            }});
+                            structure.energy >= structure.energyCapacity*0.6 ; // if we use *0.9 harvesters still can't replenish quickly enough
+                        */
+                    }        
+            });
             
-            if(targets.length > 0 && (!Memory.specialBuilder || Memory.pairActive)){ // only starts using energy from spawn at stage 4 - needs this inorder to allow stage 3 creeps to spawn
+            if(((targets.length > 0 && creep.room.controller.level < 3) && (!Memory.specialBuilder || Memory.pairActive)) || (Memory.stage >= 2 && Game.spawns['Spawn1'].room.energyAvailable >= 500)){ // only starts using energy from spawn at stage 4 - needs this inorder to allow stage 3 creeps to spawn
                 //creep.say('🔄getEnergy');
                 if(creep.withdraw(targets[int], RESOURCE_ENERGY)==ERR_NOT_IN_RANGE){
                     creep.moveTo(targets[int], {visualizePathStyle: {stroke: '#0CFF00'}});
@@ -96,7 +107,7 @@ var roleBuilder = {
                     creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
                 }
             }
-            else if(targets.length==0 || creep.room.energyAvailable < 500){
+            else if(targets.length==0 || creep.room.energyAvailable <= 500){
                 //creep.say('🔄 harvest');
                 var sources = creep.room.find(FIND_SOURCES);
                 if(creep.harvest(sources[1]) == ERR_NOT_IN_RANGE) {
