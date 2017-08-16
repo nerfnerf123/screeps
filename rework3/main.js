@@ -20,7 +20,7 @@ FLAGS :
     - 'Pavers' : paver/repairer rally point
     - 'Defenders' : defenders rally point
 TO DO LIST :
-    - REWORK MINER SPAWNING SCRIPT TO SPAWN BIGGER MINERS AT LATER STAGES
+    - EXPAND TO ROOM NORTH OF CURRENT BASE FOR HYDROGEN
 */
 /*
 REWORK 2.0 :
@@ -36,25 +36,6 @@ REWORK 2.0 :
 REWORK 3.0 :
     - rework mining, utilize logistics asap 
         - stage 0 : 1 specialized builder sits next to container and builds it 
-*/
-/*
-OCCUPIED CONSTRUCTION SITES :
-    0 = free
-    x = occupied
-    T = tower
-    S = Spawn1
-    
-    
-    1.  1   2   3   4   5   6   7 
-    2.  0   0   0   x   0   0   0
-    2.  0   0   x   T   x   0   0 
-    3.  x   0   0   0   0   0   0 
-    4.  x   0   0   S   0   0   0 
-    5.  x   0   0   x   0   0   0
-    6.  0   0   x   x   x   0   0
-    8.  0   0   0   x   0   0   0   
-    9.  0   0   0   0   0   0   0
-    
 */
 /*
 table of functions :
@@ -127,6 +108,7 @@ module.exports.loop = function () {
     const spawnPos = Game.spawns['Spawn1'].pos;
     var extensions = Game.spawns['Spawn1'].room.find(FIND_MY_STRUCTURES, {filter: { structureType: STRUCTURE_EXTENSION }});
     var containers = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {filter: { structureType: STRUCTURE_CONTAINER }});
+    var constructs = Game.spawns['Spawn1'].room.find(FIND_CONSTRUCTION_SITES);
     //console.log(containers.length);
     
     // CONTAINER BUILDER
@@ -142,6 +124,7 @@ module.exports.loop = function () {
         buildContainers(1); //build containers at source 1 - use pairs 3/4 to access
     }; 
     //console.log(buildable);
+    //console.log(containers.length);
     if(Memory.builtContainers[1] && (containers.length >= buildable)){ // BROKEN PLEASE FIX ME
         Memory.containersDone[1] = true;
         Memory.specialBuilder = false;
@@ -185,11 +168,12 @@ module.exports.loop = function () {
         else if(upgraders.length < 1) { // if harvesters less than 2, make more
             spawn.run('upgrader0');
         }
-        
         // MINER / HAULER
         if(Memory.containersDone[0] && !Memory.pairActive) {
             spawnPair(0); // IM BROKEN TOO PLEASE FIX ME 
         }
+        // TOWER
+        tower(0);
         //CONSTRUCTION 
         if(Game.rooms[roomName].controller.level >= 2) {
             Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y+1, STRUCTURE_EXTENSION); // spawns at bottom of spawn
@@ -224,10 +208,11 @@ module.exports.loop = function () {
             spawn.run('repairer4');
         }
         // MINER / HAULER
-        if(checkSource(1)){
+        if(checkSource(1) && Game.spawns['Spawn1'].room.energyAvailable >= 200){
             spawnPair(1);
         };
-        
+        // TOWER
+        tower(0);
         
         //CONSTRUCTION 
         Game.rooms[roomName].createConstructionSite(spawnPos.x-1, spawnPos.y+2, STRUCTURE_EXTENSION); // spawns at left of petal center
@@ -236,7 +221,7 @@ module.exports.loop = function () {
         //checkMaxEnergy(); // dont use it until stage 2
         
         // PROGRESSION CHECKER
-        if(harvesters.length >= 1 && builders.length >= 4 && upgraders.length >= 1 && repairers.length >= 1 && Memory.stage == 1 && extensions.length >= 5 && Game.rooms[roomName].controller.level >= 2 && Memory.containersDone[1] && Memory.pairActive) { //&& Game.spawns['Spawn1'].room.energyAvailable >= 150
+        if(harvesters.length >= 1 && builders.length >= 4 && upgraders.length >= 1 && repairers.length >= 1 && Memory.stage == 1 && extensions.length >= 5 && Game.rooms[roomName].controller.level >= 2 && Memory.containersDone[0] && Memory.pairActive) { //&& Game.spawns['Spawn1'].room.energyAvailable >= 150
             Memory.stage++;
         }
         else {
@@ -252,7 +237,10 @@ module.exports.loop = function () {
             spawn.run('harvester2');
         }
         // BUILDERS
-        else if(builders.length < 8) { // if harvesters less than 2, make more
+        else if(builders.length < 2 && constructs.length <= 4) { // if harvesters less than 2, make more
+            spawn.run('builder2');
+        }
+        else if(builders.length < 6 && constructs.length > 4) { // if harvesters less than 2, make more
             spawn.run('builder2');
         }
         // UPGRADERS
@@ -260,7 +248,7 @@ module.exports.loop = function () {
             spawn.run('upgrader2');
         }
         // REPAIRERS
-        else if(repairers.length < 1) { // if harvesters less than 2, make more
+        else if(repairers.length < 2) { // if harvesters less than 2, make more
             spawn.run('repairer4');
         }
         // PAVERS
@@ -268,17 +256,19 @@ module.exports.loop = function () {
             spawn.run('paver4');
         }
         // MINER / HAULER
-        if(checkSource(2) && Game.spawns['Spawn1'].room.energyAvailable >= 200){ 
+        if(checkSource(2) && Game.spawns['Spawn1'].room.energyAvailable >= 350){ 
             spawnPair(2);
         };
         if(checkSource(3) && Game.spawns['Spawn1'].room.energyAvailable >= 550){ // ensures that only big combos will be spawned
             spawnPair(3);
         };
+        // TOWER
+        tower(0);
         //CONSTRUCTION 
         
         //checkMaxEnergy();
         // PROGRESSION CHECKER
-        if(harvesters.length >= 1 && builders.length >= 8 && upgraders.length >= 1 && repairers.length >= 1 && pavers.length >= 1 && Memory.stage == 2 && extensions.length >= 5 && Game.rooms[roomName].controller.level >= 3 && Memory.containersDone[1] && Memory.pairActive) {
+        if(harvesters.length >= 1 && ((builders.length >= 2 && constructs.length <= 4) || (builders.length >= 6 && constructs.length > 4)) && upgraders.length >= 1 && repairers.length >= 1 && pavers.length >= 1 && Memory.stage == 2 && extensions.length >= 5 && Game.rooms[roomName].controller.level >= 3 && Memory.containersDone[1] && Memory.pairActive) {
             Memory.stage++;
         }
         else {
@@ -294,7 +284,7 @@ module.exports.loop = function () {
             spawn.run('harvester3');
         }
         // BUILDERS
-        else if(builders.length < 8) { // if harvesters less than 2, make more
+        else if(builders.length < 4) { // if harvesters less than 2, make more
             spawn.run('builder3');
         }
         // UPGRADERS
@@ -302,7 +292,7 @@ module.exports.loop = function () {
             spawn.run('upgrader3');
         }
         // REPAIRERS
-        else if(repairers.length < 1) { // if harvesters less than 2, make more
+        else if(repairers.length < 2) { // if harvesters less than 2, make more
             spawn.run('repairer4');
         }
         // PAVERS
@@ -310,13 +300,15 @@ module.exports.loop = function () {
             spawn.run('paver4');
         }
         // DEFENDERS
-        else if(defenders.length < 2) { // if harvesters less than 2, make more
+        else if(defenders.length < 1) { // if harvesters less than 2, make more
             spawn.run('defender4');
         }
         // TOWER
         tower(0); // function that runs the tower
         // MINER / HAULER
-        //spawnPair(2); can't do this bc they dont have anywhere to go... solution? add a second property to the function that tells them which source to go to instead of defaulting to 0
+        if(checkSource(4) && Game.spawns['Spawn1'].room.energyAvailable >= 550){ // ensures that only big combos will be spawned
+            spawnPair(4);
+        };
         
         //CONSTRUCTION 
         Game.rooms[roomName].createConstructionSite(spawnPos.x, spawnPos.y-2, STRUCTURE_TOWER); // spawns at top+2 of spawn
@@ -328,7 +320,7 @@ module.exports.loop = function () {
         
         //checkMaxEnergy();
         // PROGRESSION CHECKER
-        if(harvesters.length >= 1 && builders.length >= 8 && upgraders.length >= 1 && repairers.length >= 1 && pavers.length >= 1 && defenders.length >= 2 && Memory.stage == 3 && extensions.length >= 10 && Game.rooms[roomName].controller.level >= 3 && Memory.containersDone[1] && Memory.pairActive) {
+        if(harvesters.length >= 1 && builders.length >= 4 && upgraders.length >= 1 && repairers.length >= 1 && pavers.length >= 1 && defenders.length >= 1 && Memory.stage == 3 && extensions.length >= 10 && Game.rooms[roomName].controller.level >= 3 && Memory.containersDone[1] && Memory.pairActive) {
             Memory.stage++;
         }
         else {
@@ -348,11 +340,11 @@ module.exports.loop = function () {
             spawn.run('builder4');
         }
         // UPGRADERS
-        else if(upgraders.length < 6) { // if harvesters less than 2, make more
+        else if(upgraders.length < 4) { // if harvesters less than 2, make more
             spawn.run('upgrader4');
         }
         // REPAIRERS
-        else if(repairers.length < 1) { // if harvesters less than 2, make more
+        else if(repairers.length < 2) { // if harvesters less than 2, make more
             spawn.run('repairer4');
         }
         // PAVERS
@@ -366,13 +358,16 @@ module.exports.loop = function () {
         // TOWER
         tower(0); // function that runs the tower
         // MINER / HAULER
-        //spawnPair(2); can't do this bc they dont have anywhere to go... solution? add a second property to the function that tells them which source to go to instead of defaulting to 0
+        /*
+        if(checkSource(5) && Game.spawns['Spawn1'].room.energyAvailable >= 550){ // ensures that only big combos will be spawned
+            spawnPair(5);
+        }; */
         
         //CONSTRUCTION 
         
         //checkMaxEnergy();
         // PROGRESSION CHECKER
-        if(harvesters.length >= 1 && builders.length >= 2 && upgraders.length >= 6 && repairers.length >= 1 && pavers.length >= 1 && defenders.length >= 2 && Memory.stage == 4 && extensions.length >= 10 && Game.rooms[roomName].controller.level >= 4 && Memory.containersDone[1] && Memory.pairActive) {
+        if(harvesters.length >= 1 && builders.length >= 2 && upgraders.length >= 4 && repairers.length >= 2 && pavers.length >= 1 && defenders.length >= 2 && Memory.stage == 4 && extensions.length >= 10 && Game.rooms[roomName].controller.level >= 4 && Memory.containersDone[1] && Memory.pairActive) {
             Memory.stage++;
         }
         else {
@@ -388,7 +383,7 @@ module.exports.loop = function () {
             spawn.run('harvester5');
         }
         // BUILDERS
-        else if(builders.length < 6) { // if harvesters less than 2, make more
+        else if(builders.length < 4) { // if harvesters less than 2, make more
             spawn.run('builder5');
         }
         // UPGRADERS
@@ -396,11 +391,11 @@ module.exports.loop = function () {
             spawn.run('upgrader5');
         }
         // REPAIRERS
-        else if(repairers.length < 1) { // if harvesters less than 2, make more
+        else if(repairers.length < 2) { // if harvesters less than 2, make more
             spawn.run('repairer4');
         }
         // PAVERS
-        else if(pavers.length < 1) { // if harvesters less than 2, make more
+        else if(pavers.length < 2) { // if harvesters less than 2, make more
             spawn.run('paver4');
         }
         // DEFENDERS
@@ -427,7 +422,7 @@ module.exports.loop = function () {
         Game.rooms[roomName].createConstructionSite(spawnPos.x+2, spawnPos.y+1, STRUCTURE_EXTENSION); // lower
         
         // PROGRESSION CHECKER
-        if(harvesters.length >= 1 && builders.length >= 6 && upgraders.length >= 2 && repairers.length >= 1 && pavers.length >= 1 && defenders.length >= 4 && Memory.stage == 5 && extensions.length >= 20 && Game.rooms[roomName].controller.level >= 4 && Memory.containersDone[1] && Memory.pairActive) {
+        if(harvesters.length >= 1 && builders.length >= 4 && upgraders.length >= 2 && repairers.length >= 2 && pavers.length >= 2 && defenders.length >= 4 && Memory.stage == 5 && extensions.length >= 20 && Game.rooms[roomName].controller.level >= 4 && Memory.containersDone[1] && Memory.pairActive) {
             Memory.stage++;
         }
         else {
@@ -532,7 +527,7 @@ module.exports.loop = function () {
             //console.log(str);
             if(checkBuildable(aroundSources[str])==false && !Memory.builtContainers[sourceNum]){
                 Game.rooms[roomName].createConstructionSite(aroundSources[str].x, aroundSources[str].y, STRUCTURE_CONTAINER);
-            };
+            }
             if(containers.length >= buildable){
                 Memory.builtContainers[sourceNum] = true;
             }
@@ -570,18 +565,20 @@ module.exports.loop = function () {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_TOWER);}});
         if(tower.length > 0) {
-            let closestDamagedStructure = tower[num].pos.findClosestByRange(FIND_STRUCTURES, {
+            var closestDamagedStructure = tower[num].pos.findClosestByRange(FIND_STRUCTURES, {
                 filter: (structure) => structure.hits < structure.hitsMax
             });
             if(closestDamagedStructure) {
                 tower[num].repair(closestDamagedStructure);
             }
 
-            let closestHostile = tower[num].pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+            var closestHostile = tower[num].pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if(closestHostile) {
                 tower[num].attack(closestHostile);
             }
-        };    
+            //console.log(closestDamagedStructure + closestHostile);
+        };
+        
     };
     // REPORTING FUNCTION 
     function report(current, prog){

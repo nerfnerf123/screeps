@@ -11,7 +11,7 @@ var spawn = {
                 }
                 break;
             case 'builder0':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE], name, {role: 'builder'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,MOVE], name, {role: 'builder'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new builder: ' + newName);
                 }
@@ -61,7 +61,7 @@ var spawn = {
                     console.log('Spawning new upgrader: ' + newName);
                 }
                 break;
-            // STAGE 3
+            // STAGE 3 : 5-10exts : 550-800energy
             case 'harvester3':
                 var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE], name, {role: 'harvester'});
                 if(newName!=-6&&newName!=-4) {
@@ -69,7 +69,7 @@ var spawn = {
                 }
                 break;
             case 'builder3':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], name, {role: 'builder'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE], name, {role: 'builder'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new builder: ' + newName);
                 }
@@ -86,21 +86,21 @@ var spawn = {
                     console.log('Spawning new defender: ' + newName);
                 }
                 break;
-            // STAGE 4
+            // STAGE 4 10ext - 800energy
             case 'harvester4':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE,MOVE], name, {role: 'harvester'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], name, {role: 'harvester'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new harvester: ' + newName);
                 }
                 break;
             case 'builder4':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], name, {role: 'builder'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], name, {role: 'builder'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new builder: ' + newName);
                 }
                 break;
             case 'upgrader4':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE], name, {role: 'upgrader'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], name, {role: 'upgrader'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new upgrader: ' + newName);
                 }
@@ -123,21 +123,21 @@ var spawn = {
                     console.log('Spawning new repairer: ' + newName);
                 }
                 break;
-            // STAGE 5
+            // STAGE 5 : 20ext : 1300energy
             case 'harvester5':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,WORK,CARRY,CARRY,MOVE,MOVE], name, {role: 'harvester'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE], name, {role: 'harvester'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new harvester: ' + newName);
                 }
                 break;
             case 'builder5':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], name, {role: 'builder'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE,MOVE,MOVE], name, {role: 'builder'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new builder: ' + newName);
                 }
                 break;
             case 'upgrader5':
-                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], name, {role: 'upgrader'});
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,WORK,WORK,CARRY,CARRY,CARRY,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE,MOVE], name, {role: 'upgrader'});
                 if(newName!=-6&&newName!=-4) {
                     console.log('Spawning new upgrader: ' + newName);
                 }
@@ -184,7 +184,7 @@ var spawn = {
                 }
                 break;  
             case 'haulerEnergy': //creates hauler based off energy
-                let energyHauler = Game.spawns['Spawn1'].room.energyAvailable;
+                let energyHauler = (Game.spawns['Spawn1'].room.energyAvailable)/2;
                 let numberOfPartsHauler = Math.floor(energyHauler / 100);
                 let bodyHauler = [];
                 for (let i = 0; i < numberOfPartsHauler; i++) {

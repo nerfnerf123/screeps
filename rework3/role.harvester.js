@@ -42,8 +42,8 @@ var roleHarvester = {
             }
             if(creep.harvest(sources[next]) == ERR_NOT_IN_RANGE) {
                 //creep.say("🏃 moving");
-                //creep.moveTo(sources[next], {visualizePathStyle: {stroke: '#ffaa00'}});
-                creep.moveTo(path[next].x, path[next].y, {visualizePathStyle: {stroke: '#ffaa00'}});
+                creep.moveTo(sources[next], {visualizePathStyle: {stroke: '#ffaa00'}});
+                //creep.moveTo(path[next].x, path[next].y, {visualizePathStyle: {stroke: '#ffaa00'}});
             }
             else if(creep.harvest(sources[0]) == ERR_NOT_ENOUGH_RESOURCES) {
                 next++;
