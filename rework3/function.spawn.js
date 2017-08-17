@@ -142,6 +142,18 @@ var spawn = {
                     console.log('Spawning new upgrader: ' + newName);
                 }
                 break;    
+            case 'paver5':
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,CARRY,MOVE,MOVE], name, {role: 'paver'});
+                if(newName!=-6&&newName!=-4) {
+                    console.log('Spawning new paver: ' + newName);
+                }
+                break;
+            case 'repairer5':
+                var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,CARRY,CARRY,CARRY,MOVE,MOVE,MOVE], name, {role: 'repairer'});
+                if(newName!=-6&&newName!=-4) {
+                    console.log('Spawning new repairer: ' + newName);
+                }
+                break;
             // MINERS / HAULERS
             case 'miner0':
                 var newName = Game.spawns['Spawn1'].createCreep([WORK,WORK,WORK,WORK,MOVE], name, {role: 'miner'});
@@ -156,7 +168,7 @@ var spawn = {
                 }
                 break;
             case 'minerEnergy': //creates miner based off energy CAPPED AT 4 WORK
-                let energyMiner = Game.spawns['Spawn1'].room.energyAvailable;
+                let energyMiner = (Game.spawns['Spawn1'].room.energyAvailable)/2;
                 let numberOfPartsMiner = Math.floor((energyMiner-50) / 100);
                 if(numberOfPartsMiner > 4){
                     numberOfPartsMiner = 4;

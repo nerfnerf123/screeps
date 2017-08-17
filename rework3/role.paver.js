@@ -40,7 +40,7 @@ var rolePaver = {
             getEnergy();
         };
         function checkState() { // checks if they can use energy from storages creep.room.controller.level > 2 && Memory.stage >= 2) && (!Memory.specialBuilder || Memory.pairActive)) || )
-            if(Memory.stage == 0 && Game.spawns['Spawn1'].room.energyAvailable >= 300){
+            if(Memory.stage == 0 && Game.spawns['Spawn1'].room.energyAvailable >= 200){
                 return true;
             }
             else if(Memory.stage == 1 && Game.spawns['Spawn1'].room.energyAvailable >= 300){

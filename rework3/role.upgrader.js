@@ -46,10 +46,10 @@ var roleUpgrader = {
         }
         */
         function checkState() { // checks if they can use energy from storages creep.room.controller.level > 2 && Memory.stage >= 2) && (!Memory.specialBuilder || Memory.pairActive)) || )
-            if(Memory.stage == 0 && Game.spawns['Spawn1'].room.energyAvailable >= 300){
+            if(Memory.stage == 0 && Game.spawns['Spawn1'].room.energyAvailable >= 200){
                 return true;
             }
-            else if(Memory.stage == 1 && Game.spawns['Spawn1'].room.energyAvailable >= 200){
+            else if(Memory.stage == 1 && Game.spawns['Spawn1'].room.energyAvailable >= 300){
                 return true;
             }
             else if(Memory.stage == 2 && Game.spawns['Spawn1'].room.energyAvailable >= 400){
@@ -72,9 +72,21 @@ var roleUpgrader = {
             var int = 0;
             var targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
+                        
+                        if ((structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy >= structure.energyCapacity*0.6) { //&& creep.room.controller.level < 3
+                            return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy >= structure.energyCapacity*0.6;
+                        }
+                        if ((structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] >= structure.storeCapacity*0.4) {
+                            return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] >= structure.storeCapacity*0.4;
+                        }; 
+                        
+                        //return (((structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy >= structure.energyCapacity*0.6) && (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] >= structure.storeCapacity*0.4);
+                        /*
                         return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                            structure.energy >= structure.energyCapacity*0.8;
-            }});
+                            structure.energy >= structure.energyCapacity*0.6 ; // if we use *0.9 harvesters still can't replenish quickly enough
+                        */
+                    }        
+            });
             
             if(targets.length > 0 && checkState()){ // only starts using energy from spawn at stage 1 //&& creep.room.energyAvailable >= 400
                 creep.say('🔄getEnergy');
