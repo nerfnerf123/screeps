@@ -7,6 +7,12 @@ var roleBuilder = {
         var int = 0;
         var constructs = creep.room.find(FIND_CONSTRUCTION_SITES);
         //==========================================================================================================================================================
+        const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
+        if(target) {
+            if(creep.pickup(target) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(target);
+            };
+        };
         if(constructs.length == 0){
             creep.memory.building = false;
             creep.memory.upgrading = true;
@@ -67,11 +73,11 @@ var roleBuilder = {
             var int = 0;
             var targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        /*
-                        if ((structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy >= structure.energyCapacity*0.6) { //&& creep.room.controller.level < 3
+                        
+                        if ((structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy >= structure.energyCapacity*0.6 && Game.spawns['Spawn1'].room.energyAvailable >= 600) { //&& creep.room.controller.level < 3
                             return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy >= structure.energyCapacity*0.6;
                         }
-                        */
+                        
                         if ((structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] >= structure.storeCapacity*0.4) {
                             return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] >= structure.storeCapacity*0.4;
                         }; 

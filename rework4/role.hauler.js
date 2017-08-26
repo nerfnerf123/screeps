@@ -64,9 +64,12 @@ var roleHauler = {
             
             let targets = creep.room.find(FIND_MY_STRUCTURES, {
                 filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_CONTAINER ||  structure.structureType == STRUCTURE_TOWER || structure.structureType == STRUCTURE_STORAGE || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                    return (structure.structureType == STRUCTURE_TOWER || structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && // || structure.structureType == STRUCTURE_STORAGE
                         structure.energy < structure.energyCapacity;
             }});
+            if (targets == undefined) {
+                    targets = creep.room.storage;
+            };
             /*
             let targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
                     filter: (structure) => {

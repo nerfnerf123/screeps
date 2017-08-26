@@ -1,12 +1,9 @@
 // HARVESTS ENERGY FROM SOURCE AND DROPS AT SPAWN
 var next = 0; // for sources
 var roleHarvester = {
-    // write if dropping full then move next to spawn
-    
-    /** @param {Creep} creep **/
     run: function(creep) {
-        var buildRoad = require('function.buildRoad');
-        buildRoad.buildRoad(creep);
+        //var buildRoad = require('function.buildRoad');
+        //buildRoad.buildRoad(creep);
         // ENERGY HARVESTING
         if(creep.carry.energy < creep.carryCapacity) {
             var sources = creep.room.find(FIND_SOURCES);
