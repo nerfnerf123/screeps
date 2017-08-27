@@ -22,6 +22,7 @@ COLORS :
     - WHITE : MOVING
     - GREEN : getEnergy()
     - PURPLE : PAVER MOVING
+    - LIME GREEN : Picking up dropped energy
 FLAGS :
     - 'Harvesters' : harvester/hauler rally point
     - 'Builders' : builder rally point
@@ -77,7 +78,7 @@ var roleClaimer = require('role.claimer');
 Memory.signed = false; // signed with message
 Memory.specialBuilder = true; // checks if builder can use source[0]
 
-Memory.pairActive = [false,false,false,false,false,false]; // checks if miner/haulers are up
+Memory.pairActive = [false,false,false]; // checks if miner/haulers are up
 
 // CONTAINERS
 Memory.builtContainers = [false,false,false]; // check if construction sites for containers are down
@@ -165,7 +166,7 @@ module.exports.loop = function () {
     containerBuilder();
     //==========================================================================================================================================================
     // =HARVESTERS=
-    if(harvesters.length < 1 && !Memory.pairActive[0] && Game.spawns['Spawn1'].room.energyAvailable <= 100) { 
+    if(harvesters.length < 1 && !Memory.pairActive[0] && Game.spawns['Spawn1'].room.energyAvailable >= 250) { 
         spawn.run('generalEnergy', 'harvester');
     };
     // =BUILDERS=
@@ -200,7 +201,7 @@ module.exports.loop = function () {
         spawn.run('generalEnergy', 'paver');
     };
     // =DEFENDERS= 
-    if(defenders.length < 1 && closestHostile && Game.spawns['Spawn1'].room.energyAvailable >= 300 && Game.rooms[roomName].controller.level >= 4) {
+    if(defenders.length < 1 && closestHostile && Game.spawns['Spawn1'].room.energyAvailable >= 600 && Game.rooms[roomName].controller.level >= 4) {
         spawn.run('defenderEnergy', 'defender');
     }
     else if(defenders.length < 2 && closestHostile && Game.spawns['Spawn1'].room.energyAvailable >= 1000) {
@@ -211,10 +212,10 @@ module.exports.loop = function () {
     // =MINER / HAULER=
     checkPair();
     // =TOWER=
-    if(towers.length == 1){
+    if(towers.length >= 1){
        tower(0); 
     }
-    else if(towers.length == 2){
+    else if(towers.length >= 2){
         tower(1);
     };
     
@@ -329,10 +330,10 @@ module.exports.loop = function () {
     };
     function suicidePair(number){
         if(Game.creeps['Miner'+number]){
-            Game.creeps['Miner'+number].suicide;
+            Game.creeps['Miner'+number].suicide();
         };
         if(Game.creeps['Hauler'+number]){
-            Game.creeps['Hauler'+number].suicide;
+            Game.creeps['Hauler'+number].suicide();
         };
         if(Game.creeps['Miner'+number] && Game.creeps['Hauler'+number]){
             Memory.pairActive[number] = true;
@@ -342,11 +343,16 @@ module.exports.loop = function () {
         };
     };
     function updatePair(number, energyNum){
-        if(Game.creeps['Miner'+number] || Game.creeps['Hauler'+number]){
+        if(Game.creeps['Miner'+number]){
             let bodyMiner = Game.creeps['Miner'+number].body.length;
             if(bodyMiner < 7 && (Game.spawns['Spawn1'].room.energyAvailable >= energyNum)) {
-                suicidePair(number);
-                spawnPair(number);
+                //suicidePair(number);
+                Game.creeps['Miner'+number].suicide();
+                //spawnPair(number);
+                if(!Game.creeps['Miner'+number]){
+                    spawn.run('minerEnergy', 'Miner'+number);
+                };
+                console.log('\n\n UPDATED PAIR',number,'WITH',energyNum,'ENERGY\n\n');
             };
         };
     };
@@ -354,11 +360,19 @@ module.exports.loop = function () {
         if(Memory.containersDone[0] && Game.spawns['Spawn1'].room.energyAvailable >= 300) { // && !Memory.pairActive[0]
             spawnPair(0); // IM BROKEN TOO PLEASE FIX ME 
         };
-        if(Memory.containersDone[0] && checkSource(1) && Game.spawns['Spawn1'].room.energyAvailable >= 600){
+        if(Memory.containersDone[0] && checkSource(1) && Game.spawns['Spawn1'].room.energyAvailable >= 800){
             spawnPair(1);
         };
         updatePair(0,900);
-        updatePair(1,1800);
+        //updatePair(1,1800);
+        for(let i=0;i<3;i++){
+            if(Game.creeps['Miner'+i] && Game.creeps['Hauler'+i]){
+                Memory.pairActive[i] = true;
+            }
+            if (!Game.creeps['Miner'+i] || !Game.creeps['Hauler'+i]) {
+                Memory.pairActive[i] = false;;
+            };
+        };
     };
     function spawnRemoteHarvesters(){
         // rewrite this claimer spawning - 

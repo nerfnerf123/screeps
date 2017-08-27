@@ -10,7 +10,7 @@ var roleBuilder = {
         const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
         if(target) {
             if(creep.pickup(target) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(target);
+            creep.moveTo(target,{visualizePathStyle: {stroke: '#c5f442'}});
             };
         };
         if(constructs.length == 0){
@@ -73,17 +73,19 @@ var roleBuilder = {
             var int = 0;
             var targets = Game.spawns['Spawn1'].room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
-                        
+                        /*
                         if ((structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy >= structure.energyCapacity*0.6 && Game.spawns['Spawn1'].room.energyAvailable >= 600) { //&& creep.room.controller.level < 3
                             return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) && structure.energy >= structure.energyCapacity*0.6;
                         }
                         
                         if ((structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] >= structure.storeCapacity*0.4) {
                             return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && structure.store[RESOURCE_ENERGY] >= structure.storeCapacity*0.4;
-                        }; 
+                        };
+                        */
+                        return (structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_STORAGE) && (structure.store[RESOURCE_ENERGY] >= 400);
                     }        
             });
-            
+            //console.log(creep.withdraw(targets[int], RESOURCE_ENERGY));
             if(targets.length > 0 && (!Memory.specialBuilder || Memory.pairActive) && Game.spawns['Spawn1'].room.energyAvailable >= 300){ // only starts using energy from spawn at stage 4 - needs this inorder to allow stage 3 creeps to spawn 
                 if(creep.withdraw(targets[int], RESOURCE_ENERGY)==ERR_NOT_IN_RANGE){
                     if(!creep.fatigue){

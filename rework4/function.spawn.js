@@ -5,7 +5,7 @@ var spawn = {
         switch(creepBody){
             case 'generalEnergy': //creates miner based off energy CAPPED AT 4 WORK
                 let energyGeneral = (Game.spawns['Spawn1'].room.energyAvailable);
-                let numberOfPartsGeneral = Math.floor((energyGeneral) / 200); // divide by the total cost of parts
+                let numberOfPartsGeneral = Math.floor((energyGeneral) / 250); // divide by the total cost of parts
                 let bodyGeneral = [];
                 /*
                 if(numberOfPartsGeneral > 0) {
@@ -21,6 +21,7 @@ var spawn = {
                     bodyGeneral.push(CARRY);
                 };
                 for (let i = 0; i < numberOfPartsGeneral; i++) {
+                    bodyGeneral.push(MOVE);
                     bodyGeneral.push(MOVE);
                 };
                 var newName = Game.spawns['Spawn1'].createCreep(bodyGeneral, undefined, {role: name});

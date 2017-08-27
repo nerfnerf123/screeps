@@ -11,7 +11,7 @@ var roleHarvester = {
             const target = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
             if(target) {
                 if(creep.pickup(target) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(target);
+                creep.moveTo(target,{visualizePathStyle: {stroke: '#c5f442'}});
                 };
             };
             if(next > sources.length) {
